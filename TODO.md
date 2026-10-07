@@ -1,0 +1,55 @@
+# TODO — the build spine
+
+Phased milestones, each ending at a **gate + a commit + a stop**. Short build: if it runs long, cut tools, not contract
+tests. Decisions already settled (do not re-open): `DECISIONS.md` CPM-DEC 001–005. CPM-DEC 006 is confirmed at M1.
+
+---
+
+## Phase 0 — scaffold ✅ (2026-10-07)
+- [x] `CLAUDE.md`, `DECISIONS.md`, `README.md` (promise + limits stub), `TODO.md`, `.gitignore`
+- [x] `LICENSE` (MIT), `package.json` (`bin`, `engines`, `type: module`), `tsconfig.json` (strict), vitest config
+- [x] `docs/BUILD-LOG.md` first entry
+- [x] `git init` + first commit + GitHub remote `tjromack/clear-pricer-mcp` (private until the gate)
+
+## Milestone 0 — spike: the data path works from Node, through the proxy ✅ (2026-10-07)
+- [x] `@duckdb/node-api` reads a pinned-tag Parquet over HTTPS on this machine; Node `fetch` downloads `manifest.json`
+- [x] Download + SHA-256 verify a small file against the manifest; tampered file → refusal
+- [x] Range-read one NPI from `dim_provider_history` remotely; record latency → settle CPM-DEC 002's open question
+- [x] Hello-world MCP server over stdio; an SDK `Client` spawning it (source and compiled `dist/`) lists its one tool
+- [x] **Gate:** a real row from the release reaches an MCP client. **stop**
+
+## Milestone 1 — release layer + first tool, end to end
+- [ ] `release.ts`: pinned tag, manifest, cache dir, verify-or-refuse; `release_info` tool
+- [ ] `provenance.ts` + `errors.ts` (actionable messages, `isError: true`)
+- [ ] `compare_code_prices` with zod input/output schemas and `structuredContent`
+- [ ] Fixture Parquet slices + fixture manifest (`scripts/make-fixtures`); offline contract tests
+- [ ] e2e: SDK `Client` over `InMemoryTransport` lists tools and calls both
+- [ ] Confirm CPM-DEC 006 tool set. **Gate:** 99213 comparison matches the release; empty match errors loudly. **stop**
+
+## Milestone 2 — the remaining tools
+- [ ] `find_codes` (search published descriptions; never AMA text)
+- [ ] `get_payer_rates` (filter codes before the join; `distinct charge_id`; bounded `limit`)
+- [ ] `lookup_provider` (NPI Luhn check digit with the 80840 prefix; half-open as-of)
+- [ ] `data_quality` (exclude or select the `ALL` row explicitly)
+- [ ] Contract tests per tool: schema, provenance on every row, fail-loudly, its grain guard
+- [ ] **Gate:** every tool has a passing contract test and a test that proves its grain guard. **stop**
+
+## Milestone 3 — verification against the real release
+- [ ] `tests/release/`: tool outputs recomputed against `check_values.json` (row counts, fan-out 3.07×, integer-cent
+      checksums where they apply)
+- [ ] A grain-violation mutation per tool (sum across settings, skip the code filter, include `ALL`) — each must fail
+- [ ] Publish results in `docs/results/contract-tests.md` with the real numbers
+- [ ] **Gate:** release suite green; every mutation killed. **stop**
+
+## Milestone 4 — ship
+- [ ] CI: clean clone on ubuntu + windows, Node 20 + 22, `tsc --noEmit`, `npm test`; release suite with cached download
+- [ ] Publish workflow on tag (`NPM_TOKEN`); `npx -y clear-pricer-mcp` smoke test from a clean runner
+- [ ] Recorded session: Claude Code asks a price question in plain language and gets cited rows (GIF in README)
+- [ ] README complete: demonstrates line, tools table, how it's verified, limits — no `[TKTK]` left
+- [ ] clear-pricer README: "Use it from an MCP client" link
+- [ ] Score against playbook §01 (14+ required); repo public
+- [ ] **Gate:** §01 ≥ 14. **stop**
+
+## After ship
+- [ ] Case study within two weeks (`docs/CASE-STUDY.md` + /work), "What broke" from the build log
+- [ ] Site card: demonstrates line, verification pills, try-it command

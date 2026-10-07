@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+.cache/
+*.parquet
+!tests/fixtures/**/*.parquet
+*.duckdb
+*.duckdb.wal
+.env
+.env.*
+npm-debug.log*
+.DS_Store
