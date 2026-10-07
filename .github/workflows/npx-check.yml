@@ -1,0 +1,29 @@
+name: npx-check
+
+# The card's try-it command, exactly as a stranger runs it: the latest published package from the npm registry, on
+# clean Ubuntu and Windows runners, driven by an MCP client over stdio from outside this repo. Weekly, so a broken
+# try-it path shows up before the monthly site sweep does.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 13 * * 1"
+
+jobs:
+  npx:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: npx -y clear-pricer-mcp (registry, latest)
+        shell: bash
+        env:
+          SMOKE_CWD: ${{ runner.temp }}
+        run: npm run smoke -- npx -y clear-pricer-mcp

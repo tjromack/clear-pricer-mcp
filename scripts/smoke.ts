@@ -8,7 +8,10 @@ const client = new Client({ name: "smoke", version: "0.0.0" });
 // passed explicitly, exactly as a user would in their client's server config (README: "Behind a corporate proxy").
 const env: Record<string, string> = { ...getDefaultEnvironment() };
 if (process.env["NODE_EXTRA_CA_CERTS"]) env["NODE_EXTRA_CA_CERTS"] = process.env["NODE_EXTRA_CA_CERTS"];
-await client.connect(new StdioClientTransport({ command: command ?? process.execPath, args, env }));
+// SMOKE_CWD runs the server from a neutral directory. `npx clear-pricer-mcp` inside this repo resolves the repo's own
+// package (same name) instead of the registry's, so the registry check must run elsewhere, as a user would.
+const cwd = process.env["SMOKE_CWD"];
+await client.connect(new StdioClientTransport({ command: command ?? process.execPath, args, env, ...(cwd ? { cwd } : {}) }));
 
 const { tools } = await client.listTools();
 console.log(`tools: ${tools.map((t) => t.name).join(", ")}`);
