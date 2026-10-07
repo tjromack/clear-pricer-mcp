@@ -134,3 +134,32 @@ against the raw table); CMP-1 is now caught by two. 88 tests total.
 
 **Next.** Milestone 4: CI on ubuntu + windows, npm publish workflow, README with real numbers, recorded session,
 §01 scoring.
+
+## 2026-10-07 — Milestone 4: CI, publishing, README, scorecard
+
+**What happened.** CI (`ci.yml`): clean clone on Ubuntu and Windows × Node 20 and 22 (typecheck, offline tests,
+build), plus a release job that downloads the pinned release into a cached directory, runs the release suite, and
+drives the compiled server over stdio. Publish workflow (`publish.yml`) on `v*` tags: the same gates, `npm publish
+--provenance`, then the card's exact `npx -y clear-pricer-mcp` command run from the registry on clean Ubuntu and
+Windows runners. README rewritten with the real numbers; `docs/DEMO.md` scripts the recording; `docs/SCORECARD.md`
+scores §01 at 14/16 now and 16/16 after publish and the GIF.
+
+**Results.** First CI run green on all five jobs (37–57 s each; the release job downloaded the release on a fresh
+runner in 41 s total). A local clean clone: `npm ci`, typecheck, 66 offline tests, build. Packed tarball: 29 files,
+33.6 kB; installed from the tarball it starts and answers `initialize`.
+
+**What broke.**
+- `npx -y ./clear-pricer-mcp-0.1.0.tgz` exits without running anything: with a tarball *path*, npx does not resolve
+  the bin. `npx --yes --package <tgz> clear-pricer-mcp` works, and from the registry the bare name resolves by package
+  name; the publish workflow tests exactly that on clean runners.
+- GitHub warned that `actions/checkout@v4` / `setup-node@v4` run on deprecated Node 20; moved to v7 / v7 and
+  `actions/cache@v6`.
+- Source maps pointed at `src/`, which is not shipped; turned off in the build.
+
+**Learnings.** clear-pricer's own `docs/grain.md` as-of example (NPI 1497859649 on 2026-06-30) returns 0 rows against
+the current release: that NPI's history starts 2026-07-16. `lookup_provider` answers it with the valid range instead
+of nothing, which is the behaviour this server is built for; the example in clear-pricer should move to a date inside
+the history.
+
+**Open (owner).** npm account + `NPM_TOKEN`, tag `v0.1.0`; record the session; make the repo public; push
+clear-pricer's link commit.
