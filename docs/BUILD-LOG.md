@@ -163,3 +163,21 @@ the history.
 
 **Open (owner).** npm account + `NPM_TOKEN`, tag `v0.1.0`; record the session; make the repo public; push
 clear-pricer's link commit.
+
+## 2026-10-07 — Published: `clear-pricer-mcp@0.1.0`
+
+**What happened.** Tagged `v0.1.0`. The publish workflow passed every gate, then npm refused the upload: provenance
+is only accepted from a public repository (`422 … Unsupported GitHub Actions source repository visibility:
+private`). The repo was made public and the failed jobs re-run; the package published with a signed provenance
+statement. The post-publish `npx` check then failed with `clear-pricer-mcp: not found`.
+
+**What broke.** The check ran `npx clear-pricer-mcp` inside the repo checkout, whose `package.json` has the same
+name, so npx resolved the local project (no bin installed) instead of the registry. The published package was fine:
+run from a neutral directory against the registry it started and answered. The smoke client now takes `SMOKE_CWD`,
+and a new `npx-check.yml` runs the card's command from the registry on clean Ubuntu and Windows runners, on demand
+and weekly; first run green on both.
+
+**Learnings.** A test of "what a stranger runs" has to run where a stranger is. Both failures here were in the
+checks, not the package, and both were only visible because the checks ran against the real registry.
+
+**Score.** §01 at 15/16; the recorded session GIF is the last point.
