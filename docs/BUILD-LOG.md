@@ -106,3 +106,30 @@ rows, 19 provider versions chosen case by case).
 
 **Next.** Milestone 3: per-tool mutation suite (grain violations each must fail), results published in
 `docs/results/contract-tests.md`.
+
+## 2026-10-07 — Milestone 3: verification against the release, and a mutation suite
+
+**What happened.** Added release tests that recompute the downloaded release against its own `check_values.json` at
+full scale, and a mutation suite: 24 hand-written bugs, each applied, type-checked, run against every suite, and
+restored, with the results page generated from the run (`npm run mutate` → `docs/results/contract-tests.md`).
+
+**Results.**
+- 87 tests: 17 unit, 45 contract, 3 e2e, 22 release. The release suite runs in about 3 s once the files are cached.
+- At full scale: 7,371,416 charges join to 22,647,893 code rows (3.0724×, the published fan-out); the tools'
+  semi-join covers exactly the 5,704,751 charges `agg_code_prices` covers; integer-cent checksums of
+  `negotiated_rate` and `gross_charge` match; every downloaded table matches its row count and proved key.
+- Mutations: 24 of 24 killed.
+
+**What broke (in the tests, which is the point).**
+- First run: 21 killed, 1 survived, 2 invalid. The survivor, PAY-6 (payer filter leaking into the per-setting
+  breakdown), had no test even though the output schema documents the behaviour. Added one.
+- NPI-3 as planned ("latest version starting on or before the date") is an equivalent mutant: the history has no
+  gaps between versions, so it cannot be wrong on this data. Replaced with "ignores as_of", reason recorded.
+- REL-3 and NPI-3 initially failed to type-check (`findLast` is ES2023; the target is ES2022). The runner reports
+  those as invalid rather than killed, which is what kept them from inflating the score.
+
+**Learnings.** CMP-1 (averaging across settings) is caught by exactly one test. Killed, but thin: the most
+important grain rule in the project rests on a single assertion. Worth a second, independent test in a later pass.
+
+**Next.** Milestone 4: CI on ubuntu + windows, npm publish workflow, README with real numbers, recorded session,
+§01 scoring.

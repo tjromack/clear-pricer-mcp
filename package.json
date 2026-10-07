@@ -27,7 +27,8 @@
     "test:release": "vitest run --project release",
     "start": "node dist/index.js",
     "fixtures": "node --import tsx scripts/make-fixtures.ts",
-    "smoke": "node --import tsx scripts/smoke.ts"
+    "smoke": "node --import tsx scripts/smoke.ts",
+    "mutate": "node --import tsx scripts/mutate.ts"
   },
   "keywords": [
     "mcp",

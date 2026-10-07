@@ -1,0 +1,264 @@
+{
+  "baseline": {
+    "passed": 87,
+    "total": 87
+  },
+  "outcomes": [
+    {
+      "id": "CMP-1",
+      "tool": "compare_code_prices",
+      "bug": "Averages a hospital's rows across settings into one row (crosses the agg_code_prices grain)",
+      "status": "killed",
+      "killedBy": [
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract returns table rows as published: one per hospital × setting, never combined"
+      ]
+    },
+    {
+      "id": "CMP-2",
+      "tool": "compare_code_prices",
+      "bug": "Ignores the rate basis, mixing contracted dollars with percent-derived rows",
+      "status": "killed",
+      "killedBy": [
+        "release/compare_code_prices.release.test.ts › against the pinned release 99213 matches the release row for row, with Northwestern reported as not publishing contracted dollars",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract defaults to contracted dollars and names the hospital that publishes the code another way",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract returns table rows as published: one per hospital × setting, never combined",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract filters to one setting when asked",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract includes a hospital once the caller asks for the basis it publishes",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract says plainly when a rate basis carries no dollar figure",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract lists a hospital that does not publish the code at all with nothing published"
+      ]
+    },
+    {
+      "id": "CMP-3",
+      "tool": "compare_code_prices",
+      "bug": "Silently drops the hospitals that publish the code another way (empty not_included)",
+      "status": "killed",
+      "killedBy": [
+        "release/compare_code_prices.release.test.ts › against the pinned release 99213 matches the release row for row, with Northwestern reported as not publishing contracted dollars",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract defaults to contracted dollars and names the hospital that publishes the code another way",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract lists a hospital that does not publish the code at all with nothing published",
+        "contract/compare_code_prices.test.ts › compare_code_prices — fails loudly, never empty a filter nothing matches is an error listing what each hospital does publish"
+      ]
+    },
+    {
+      "id": "CMP-4",
+      "tool": "compare_code_prices",
+      "bug": "Returns an empty price list as success when nothing matches",
+      "status": "killed",
+      "killedBy": [
+        "contract/compare_code_prices.test.ts › compare_code_prices — fails loudly, never empty a filter nothing matches is an error listing what each hospital does publish"
+      ]
+    },
+    {
+      "id": "CMP-5",
+      "tool": "compare_code_prices",
+      "bug": "Cites the wrong hospital's source file in provenance",
+      "status": "killed",
+      "killedBy": [
+        "release/compare_code_prices.release.test.ts › against the pinned release 99213 matches the release row for row, with Northwestern reported as not publishing contracted dollars",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract defaults to contracted dollars and names the hospital that publishes the code another way",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract returns table rows as published: one per hospital × setting, never combined",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract includes a hospital once the caller asks for the basis it publishes",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract lists a hospital that does not publish the code at all with nothing published",
+        "e2e/server.test.ts › server over MCP answers a price question end to end with text a client without structured output can read"
+      ]
+    },
+    {
+      "id": "PAY-1",
+      "tool": "get_payer_rates",
+      "bug": "Joins charges to codes instead of a semi-join, and counts rows (the 3.07x fan-out)",
+      "status": "killed",
+      "killedBy": [
+        "release/tools.release.test.ts › get_payer_rates against the whole release Northwestern 99213: 282 charges, none fanned out",
+        "contract/get_payer_rates.test.ts › get_payer_rates — grain counts each charge once: per setting × basis it equals agg_code_prices.charge_rows",
+        "contract/get_payer_rates.test.ts › get_payer_rates — grain does not fan out: a naive charges-to-codes join would return more rows than there are charges",
+        "contract/get_payer_rates.test.ts › get_payer_rates — contract filters by rate basis, setting and payer",
+        "contract/get_payer_rates.test.ts › get_payer_rates — contract keeps rows the hospital published twice, each cited at its own file position, and says so"
+      ]
+    },
+    {
+      "id": "PAY-2",
+      "tool": "get_payer_rates",
+      "bug": "Derives the code family from code_family alone (MS-DRGs find no charges)",
+      "status": "killed",
+      "killedBy": [
+        "release/tools.release.test.ts › get_payer_rates against the whole release an MS-DRG resolves to its charges (family comes from declared_type)",
+        "contract/get_payer_rates.test.ts › get_payer_rates — grain counts each charge once: per setting × basis it equals agg_code_prices.charge_rows"
+      ]
+    },
+    {
+      "id": "PAY-3",
+      "tool": "get_payer_rates",
+      "bug": "Drops the MS-DRG qualifying rule",
+      "status": "killed",
+      "killedBy": [
+        "release/check_values.release.test.ts › fan-out at full scale the tools' semi-join over qualifying items covers exactly the charges agg_code_prices covers",
+        "release/tools.release.test.ts › get_payer_rates against the whole release an MS-DRG resolves to its charges (family comes from declared_type)",
+        "contract/get_payer_rates.test.ts › get_payer_rates — grain counts each charge once: per setting × basis it equals agg_code_prices.charge_rows"
+      ]
+    },
+    {
+      "id": "PAY-4",
+      "tool": "get_payer_rates",
+      "bug": "Ignores the row limit",
+      "status": "killed",
+      "killedBy": [
+        "release/tools.release.test.ts › get_payer_rates against the whole release an MS-DRG resolves to its charges (family comes from declared_type)",
+        "release/tools.release.test.ts › get_payer_rates against the whole release Northwestern 99213: 282 charges, none fanned out",
+        "contract/get_payer_rates.test.ts › get_payer_rates — grain counts each charge once: per setting × basis it equals agg_code_prices.charge_rows",
+        "contract/get_payer_rates.test.ts › get_payer_rates — grain the per-setting breakdown ignores the payer filter, so it still reconciles to charge_rows",
+        "contract/get_payer_rates.test.ts › get_payer_rates — grain does not fan out: a naive charges-to-codes join would return more rows than there are charges",
+        "contract/get_payer_rates.test.ts › get_payer_rates — contract labels every row with its basis and cites its position in the hospital's file",
+        "contract/get_payer_rates.test.ts › get_payer_rates — contract filters by rate basis, setting and payer",
+        "contract/get_payer_rates.test.ts › get_payer_rates — contract keeps rows the hospital published twice, each cited at its own file position, and says so",
+        "contract/get_payer_rates.test.ts › get_payer_rates — contract truncates at the limit and says so",
+        "contract/get_payer_rates.test.ts › get_payer_rates — contract explains rows without a dollar figure"
+      ]
+    },
+    {
+      "id": "PAY-5",
+      "tool": "get_payer_rates",
+      "bug": "Returns zero matching charges as success",
+      "status": "killed",
+      "killedBy": [
+        "contract/get_payer_rates.test.ts › get_payer_rates — fails loudly filters that exclude everything list what exists, including payer names"
+      ]
+    },
+    {
+      "id": "PAY-6",
+      "tool": "get_payer_rates",
+      "bug": "Applies the payer filter to the per-setting breakdown too (breakdown no longer reconciles to charge_rows)",
+      "status": "killed",
+      "killedBy": [
+        "contract/get_payer_rates.test.ts › get_payer_rates — grain the per-setting breakdown ignores the payer filter, so it still reconciles to charge_rows"
+      ]
+    },
+    {
+      "id": "FND-1",
+      "tool": "find_codes",
+      "bug": "Matches any search word instead of every word",
+      "status": "killed",
+      "killedBy": [
+        "release/tools.release.test.ts › the other tools against the release find_codes finds the brain MRI code from plain words",
+        "contract/find_codes.test.ts › find_codes — contract finds codes from words in the hospitals' own descriptions"
+      ]
+    },
+    {
+      "id": "FND-2",
+      "tool": "find_codes",
+      "bug": "Counts agg rows instead of summing charge_rows (charges per code wrong)",
+      "status": "killed",
+      "killedBy": [
+        "contract/find_codes.test.ts › find_codes — contract counts a code's charges once each (sum of charge_rows across settings and bases)"
+      ]
+    },
+    {
+      "id": "FND-3",
+      "tool": "find_codes",
+      "bug": "Returns an empty result as success when nothing matches",
+      "status": "killed",
+      "killedBy": [
+        "contract/find_codes.test.ts › find_codes — contract filters by hospital and code family",
+        "contract/find_codes.test.ts › find_codes — contract never returns an empty result: no match is an error with search advice"
+      ]
+    },
+    {
+      "id": "FND-4",
+      "tool": "find_codes",
+      "bug": "Marks every description as matched (hides single-hospital matches)",
+      "status": "killed",
+      "killedBy": [
+        "contract/find_codes.test.ts › find_codes — contract marks which hospitals' descriptions matched, and warns when the match rests on some of them only"
+      ]
+    },
+    {
+      "id": "NPI-1",
+      "tool": "lookup_provider",
+      "bug": "Treats valid_to as inclusive (closed intervals: two versions valid on the boundary day)",
+      "status": "killed",
+      "killedBy": [
+        "release/tools.release.test.ts › the other tools against the release lookup_provider never returns the zero-length version check_values counts",
+        "contract/lookup_provider.test.ts › lookup_provider — as-of semantics uses half-open intervals: valid_from is inclusive, valid_to exclusive",
+        "contract/lookup_provider.test.ts › lookup_provider — as-of semantics never answers with a version valid on no day"
+      ]
+    },
+    {
+      "id": "NPI-2",
+      "tool": "lookup_provider",
+      "bug": "Skips the NPI check digit",
+      "status": "killed",
+      "killedBy": [
+        "contract/lookup_provider.test.ts › lookup_provider — fails loudly rejects a mistyped NPI by its check digit before querying"
+      ]
+    },
+    {
+      "id": "NPI-3",
+      "tool": "lookup_provider",
+      "bug": "Ignores the as-of date and returns the current registration",
+      "status": "killed",
+      "killedBy": [
+        "release/tools.release.test.ts › the other tools against the release lookup_provider answers the as-of example from clear-pricer's grain.md",
+        "contract/lookup_provider.test.ts › lookup_provider — as-of semantics uses half-open intervals: valid_from is inclusive, valid_to exclusive",
+        "contract/lookup_provider.test.ts › lookup_provider — as-of semantics reports a reactivated NPI's earlier deactivated version",
+        "contract/lookup_provider.test.ts › lookup_provider — fails loudly a date before the first version lists the ranges that exist"
+      ]
+    },
+    {
+      "id": "DQ-1",
+      "tool": "data_quality",
+      "bug": "Sums the whole reconciliation table, adding the ALL row to the hospital rows",
+      "status": "killed",
+      "killedBy": [
+        "contract/data_quality.test.ts › data_quality keeps the published ALL row separate, and it agrees with the hospital rows",
+        "contract/data_quality.test.ts › data_quality still reports the overall row when filtered to one hospital"
+      ]
+    },
+    {
+      "id": "REL-1",
+      "tool": "release",
+      "bug": "Serves a downloaded file without checking its SHA-256",
+      "status": "killed",
+      "killedBy": [
+        "unit/release.test.ts › release verification chain refuses a manifest that does not match the pinned hash",
+        "unit/release.test.ts › release verification chain refuses a file whose bytes no longer match the manifest, and keeps serving the files that do"
+      ]
+    },
+    {
+      "id": "REL-2",
+      "tool": "release",
+      "bug": "Trusts a cached file without re-hashing it",
+      "status": "killed",
+      "killedBy": [
+        "unit/release.test.ts › release verification chain discards a corrupted cache entry and re-fetches a verified copy"
+      ]
+    },
+    {
+      "id": "REL-3",
+      "tool": "release",
+      "bug": "Accepts a release tag without its manifest hash",
+      "status": "killed",
+      "killedBy": [
+        "unit/release.test.ts › resolvePin refuses a tag without its manifest hash",
+        "unit/release.test.ts › resolvePin refuses a malformed hash"
+      ]
+    },
+    {
+      "id": "REL-4",
+      "tool": "release",
+      "bug": "Reads the remote provider history without the footer row-count check",
+      "status": "killed",
+      "killedBy": [
+        "unit/release.test.ts › release verification chain refuses a remote file whose Parquet footer disagrees with the manifest's row count"
+      ]
+    },
+    {
+      "id": "REL-5",
+      "tool": "release",
+      "bug": "Converts an out-of-range BIGINT to a lossy number",
+      "status": "killed",
+      "killedBy": [
+        "unit/db.test.ts › DuckDB value conversion converts BIGINT (returned as bigint) to number inside the safe range"
+      ]
+    }
+  ]
+}

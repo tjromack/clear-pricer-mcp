@@ -153,3 +153,18 @@ searches `agg_code_prices.example_description`, since `dim_charge_codes` has no 
   `NODE_EXTRA_CA_CERTS` or `NODE_OPTIONS=--use-system-ca` in the server's env in the client config), and network
   failures are retried with backoff.
 - **Rejected:** downloading through DuckDB (no raw-bytes path to hash); disabling TLS verification (never).
+
+## CPM-DEC 014 — Verification is a mutation suite over the tools, not only passing tests (2026-10-07)
+**Status:** Decided.
+
+- **What:** `scripts/mutations.ts` lists 24 realistic bugs as exact source edits (grain violations, empty-as-success,
+  wrong provenance, closed intervals, skipped integrity checks). `npm run mutate` applies each, requires it to
+  type-check, runs every suite (offline and release), records which tests failed, restores the file, and generates
+  `docs/results/contract-tests.md`. A mutant that does not compile is reported `invalid` and proves nothing.
+- **Result on 2026-10-07:** 24 of 24 killed, against 87 tests (17 unit, 45 contract, 3 e2e, 22 release).
+- **What the suite found:** one survivor on the first run (PAY-6: the per-setting breakdown silently filtered by
+  payer), which had no test; a test was added and it is now killed. One planned mutant (latest version starting on or
+  before the as-of date) turned out to be **equivalent**: the history has no gaps between versions
+  (`provider_history_gaps_between_versions = 0`), so it was replaced, and the reason is recorded in the catalogue.
+- **Rejected:** a generic mutation tool (Stryker): thousands of syntactic mutants, most irrelevant to the grain
+  failures this project is about, and a long run on a 7.4M-row fact table. Hand-written mutants name the bug.

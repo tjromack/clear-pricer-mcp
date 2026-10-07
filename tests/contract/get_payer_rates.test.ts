@@ -54,6 +54,13 @@ describe("get_payer_rates — grain", () => {
     }
   });
 
+  it("the per-setting breakdown ignores the payer filter, so it still reconciles to charge_rows", async () => {
+    const all = await rates({ code: "99213", hospital_id: "rush" });
+    const aetna = await rates({ code: "99213", hospital_id: "rush", payer: "aetna" });
+    expect(aetna.matched_charges).toBeLessThan(all.matched_charges);
+    expect(aetna.by_setting_and_basis).toEqual(all.by_setting_and_basis);
+  });
+
   it("does not fan out: a naive charges-to-codes join would return more rows than there are charges", async () => {
     const out = await rates({ code: "99213", hospital_id: "nm", limit: 200 });
     const [naive] = await t.db.query(
