@@ -1,6 +1,7 @@
 import { cp, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { Db } from "../../src/db.js";
 import { DEFAULT_PIN, Release, ReleaseIntegrityError, directorySource, resolvePin, sha256 } from "../../src/release.js";
 import { FIXTURE_PIN } from "../fixtures/pin.js";
 import { FIXTURE_DIR, fixtureRelease, tempDir } from "../helpers.js";
@@ -50,24 +51,29 @@ describe("release verification chain", () => {
     expect(sha256(await bytesOf(path))).toBe((await restarted.manifestEntry("files.parquet")).sha256);
   });
 
-  it("refuses a remote file whose size differs from the manifest", async () => {
+  it("refuses a remote file whose Parquet footer disagrees with the manifest's row count", async () => {
     await using cache = await tempDir();
     await using src = await tempDir();
-    await writeFile(join(src.path, "dim_provider_history.parquet"), "12345678901"); // 11 bytes; manifest says 10
+    const history = join(src.path, "dim_provider_history.parquet").replaceAll("\\", "/");
+    const scratch = await Db.open(fixtureRelease(cache.path));
+    await scratch.query([], `COPY (SELECT * FROM range(2)) TO '${history}' (FORMAT parquet)`); // 2 rows
+    scratch.close();
     const checkValues = JSON.stringify({ tables: {}, derived: {} });
     await writeFile(join(src.path, "check_values.json"), checkValues);
     const manifest = JSON.stringify({
       fingerprint: "test",
       inputs: { price_files: [], nppes_files: [] },
-      files: [{ file: "dim_provider_history.parquet", rows: 1, bytes: 10, sha256: "a".repeat(64) }],
+      files: [{ file: "dim_provider_history.parquet", rows: 1, bytes: 1, sha256: "a".repeat(64) }],
       check_values_sha256: sha256(new TextEncoder().encode(checkValues)),
     });
     await writeFile(join(src.path, "manifest.json"), manifest);
-    const pin = { tag: "size-test", manifestSha256: sha256(new TextEncoder().encode(manifest)) };
+    const pin = { tag: "rows-test", manifestSha256: sha256(new TextEncoder().encode(manifest)) };
 
     const release = new Release(pin, directorySource(src.path), cache.path);
-    await expect(release.remoteFile("dim_provider_history.parquet")).rejects.toThrow(/11 bytes.*says 10/s);
     expect((await release.status()).get("dim_provider_history.parquet")).toBe("remote");
+    const db = await Db.open(release);
+    await expect(db.query(["dim_provider_history"], "SELECT 1")).rejects.toThrow(/footer reports 2 rows.*manifest says 1/s);
+    db.close();
   });
 
   it("refuses a file the manifest does not list", async () => {

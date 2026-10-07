@@ -26,8 +26,9 @@
   `fct_standard_charges`, is 117 MB, a one-time cost). `dim_provider_history` (563 MB) is read by HTTP range over the
   pinned-tag URL: measured 476–648 ms per NPI lookup from this machine, because the file is sorted by NPI and a
   lookup touches a few row groups. Downloading 563 MB to answer one NPI question was rejected.
-- **Limit this creates:** range reads cannot be SHA-verified. The tool checks the remote size against the manifest
-  before querying and says in its provenance that the history was read remotely. Stated in the README limits.
+- **Limit this creates:** range reads cannot be SHA-verified. Before the first query, DuckDB reads the file's Parquet
+  footer and its row count must equal the manifest's (CPM-DEC 013); provenance says the history was read remotely.
+  Stated in the README limits.
 
 ## CPM-DEC 003 — Pinned release, SHA-verified (2026-10-07)
 **Status:** Decided.
@@ -53,7 +54,9 @@
 - **Needs:** `npm adduser` once (owner action), and an `NPM_TOKEN` repo secret for the publish workflow.
 
 ## CPM-DEC 006 — The v1 tool set (2026-10-07)
-**Status:** Proposed — confirm at Milestone 1.
+**Status:** Decided (confirmed by the owner at the Milestone 1 stop, with two refinements from the data: `find_codes`
+searches `agg_code_prices.example_description`, since `dim_charge_codes` has no descriptions; `get_payer_rates` takes
+`rate_basis`, since most Northwestern rows are percentages).
 
 | Tool | Reads | Answers |
 |---|---|---|
@@ -113,3 +116,40 @@
   same on Windows and Linux.
 - **Rejected:** hand-written fixture rows (drift from the real schema unnoticed); mocking `Release` (would not test the
   hashing at all).
+
+## CPM-DEC 011 — A code's family is derived exactly as clear-pricer derives it (2026-10-07)
+**Status:** Decided.
+
+- **What broke:** `get_payer_rates` found no charges for MS-DRG 470 at any hospital. `dim_charge_codes` carries a NULL
+  `code_family` on MS-DRG rows; `agg_code_prices` labels them `MS-DRG` via `coalesce(code_family, declared_type)`,
+  for the qualifying families plus `declared_type = 'MS-DRG'` (clear-pricer `dbt/models/marts/agg_code_prices.sql`).
+- **What:** `QUALIFYING_ITEMS` in `get_payer_rates.ts` copies that definition. A release test applies it to every
+  hospital × code at once and requires all 49,404 `agg_code_prices.charge_rows` to be reproduced: 0 mismatches.
+  Before the fix the 5,594 MS-DRG rows would have failed it.
+- **Rejected:** filtering on `code_family` alone (wrong for DRGs); joining through `agg_code_prices` (it has no item
+  ids).
+
+## CPM-DEC 012 — Surface the hospitals' own inconsistencies, don't smooth them (2026-10-07)
+**Status:** Decided.
+
+- **`find_codes`:** each description carries `matched`; when a code matched on some hospitals' wording only, a note
+  says so. Found on the real release: UChicago describes CPT 44373 (small-bowel endoscopy) as a functional brain MRI,
+  so "mri brain" matches it. The tool reports what the files say and flags where they disagree.
+- **`get_payer_rates`:** Rush's file lists some charges twice at different positions (99213 for Aetna at `r58344` and
+  `r61146`). Rows are kept as published, each cited with its `source_locator`, and a note counts the repeats.
+- **Rejected:** deduplicating repeats (would change the hospital's data and break the `charge_rows` reconciliation);
+  hiding single-hospital matches (the assistant cannot judge what it cannot see).
+
+## CPM-DEC 013 — Remote-file check through DuckDB; MCP clients strip the proxy CA (2026-10-07)
+**Status:** Decided.
+
+- **What broke:** spawned over stdio, `lookup_provider` failed every time with "unable to verify the first certificate"
+  while in-process tests passed. The SDK's `StdioClientTransport` (like MCP clients generally) passes only a whitelist
+  of env vars to the server, so `NODE_EXTRA_CA_CERTS`, which this machine sets for its TLS-inspecting proxy, never
+  reached it, and Node's `fetch` HEAD for the size check failed.
+- **What:** the remote check moved into DuckDB: `parquet_file_metadata` row count against the manifest. DuckDB is the
+  client that reads the file anyway, and it trusts this proxy on its own. With files cached, the smoke test passes with
+  `NODE_EXTRA_CA_CERTS` unset. Downloads still use `fetch`; on a certificate error the message names the fix (set
+  `NODE_EXTRA_CA_CERTS` or `NODE_OPTIONS=--use-system-ca` in the server's env in the client config), and network
+  failures are retried with backoff.
+- **Rejected:** downloading through DuckDB (no raw-bytes path to hash); disabling TLS verification (never).

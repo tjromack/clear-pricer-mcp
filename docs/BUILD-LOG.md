@@ -69,3 +69,40 @@ same command), so the run was a no-op waiting on a pipe. Lesson: check the file 
 
 **Next.** Confirm the tool set (CPM-DEC 006), then Milestone 2: `find_codes`, `get_payer_rates`, `lookup_provider`,
 `data_quality`.
+
+## 2026-10-07 — Milestone 2: `find_codes`, `get_payer_rates`, `lookup_provider`, `data_quality`
+
+**What happened.** Tool set confirmed (CPM-DEC 006). Moved the release's closed vocabularies (hospitals, settings,
+rate bases, code families) into `src/vocab.ts` as input enums, with a release test proving each equals the release's
+distinct values. Built the four tools; extended the fixtures to every table the tools read (4,781 charges, 1,745 code
+rows, 19 provider versions chosen case by case).
+
+**Results.**
+- Offline: 64 tests. Release: 11 tests against `data-2026-10-07-67efd3d2`. All six tools answer over stdio from the
+  compiled build.
+- `get_payer_rates`' charge selection reproduces every one of the 49,404 `agg_code_prices.charge_rows`: 0
+  mismatches. The fixtures fan out 3.6× if charges are joined to codes naively (4,781 → 17,094); the tool never does.
+- `data_quality`'s overall row equals `check_values.json`'s published headline (unresolved 0.0%, coverage 13.3%).
+
+**What broke.**
+1. **MS-DRGs returned no charges.** `dim_charge_codes.code_family` is NULL on MS-DRG rows; clear-pricer's
+   `agg_code_prices` derives the family as `coalesce(code_family, declared_type)`. The per-code cross-check test
+   failed on 470 at all three hospitals; the fix copies clear-pricer's definition exactly, and the whole-release check
+   now guards it (CPM-DEC 011). The fixture generator had the same bug, which is why 470 had no fixture charges.
+2. **`lookup_provider` failed every time over stdio, never in tests.** "fetch failed", then, once the error message
+   carried the cause, "unable to verify the first certificate". The SDK's stdio client passes the server only a
+   whitelist of env vars, dropping the `NODE_EXTRA_CA_CERTS` this machine sets for its TLS-inspecting proxy; vitest
+   ran the server in-process with the full environment, so it never saw the problem. Moved the remote-file check
+   into DuckDB (Parquet footer row count; DuckDB trusts the proxy on its own) and made download errors name the fix
+   (CPM-DEC 013). The first fix, retries, would not have helped; the useful one was making the error say why.
+3. `column` is a reserved word in DuckDB SQL: it broke the fixture generator and `data_quality`'s `ORDER BY`.
+
+**Learnings (about the source data).**
+- UChicago's file describes CPT 44373 (small-bowel endoscopy) as a functional brain MRI, so a description search for
+  "mri brain" returns it. `find_codes` now marks which hospitals' descriptions matched and notes single-hospital
+  matches (CPM-DEC 012).
+- Rush's file publishes some charges twice at different positions (99213 / Aetna at `r58344` and `r61146`). Kept as
+  published, each cited by position, with a note.
+
+**Next.** Milestone 3: per-tool mutation suite (grain violations each must fail), results published in
+`docs/results/contract-tests.md`.

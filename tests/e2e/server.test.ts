@@ -11,7 +11,14 @@ afterAll(async () => t.close());
 describe("server over MCP", () => {
   it("lists every tool as read-only with an output schema", async () => {
     const { tools } = await t.client.listTools();
-    expect(tools.map((x) => x.name).sort()).toEqual(["compare_code_prices", "release_info"]);
+    expect(tools.map((x) => x.name).sort()).toEqual([
+      "compare_code_prices",
+      "data_quality",
+      "find_codes",
+      "get_payer_rates",
+      "lookup_provider",
+      "release_info",
+    ]);
     for (const tool of tools) {
       expect(tool.annotations?.readOnlyHint, tool.name).toBe(true);
       expect(tool.outputSchema, tool.name).toBeDefined();
@@ -33,7 +40,8 @@ describe("server over MCP", () => {
     expect(out.manifest_sha256).toBe(FIXTURE_PIN.manifestSha256);
     expect(out.check_values_verified).toBe(true);
     expect(out.price_files.map((p) => p.hospital_id)).toEqual(["nm", "rush", "uchicago"]);
-    expect(out.files.map((f) => f.file).sort()).toEqual(["agg_code_prices.parquet", "files.parquet"]);
+    expect(out.files).toHaveLength(8);
+    expect(out.files.find((f) => f.file === "dim_provider_history.parquet")?.status).toBe("remote");
   });
 
   it("answers a price question end to end with text a client without structured output can read", async () => {

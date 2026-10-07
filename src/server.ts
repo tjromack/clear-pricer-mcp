@@ -1,6 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Db } from "./db.js";
 import { registerCompareCodePrices } from "./tools/compare_code_prices.js";
+import { registerDataQuality } from "./tools/data_quality.js";
+import { registerFindCodes } from "./tools/find_codes.js";
+import { registerGetPayerRates } from "./tools/get_payer_rates.js";
+import { registerLookupProvider } from "./tools/lookup_provider.js";
 import { registerReleaseInfo } from "./tools/release_info.js";
 
 export const SERVER_VERSION = "0.1.0";
@@ -16,7 +20,11 @@ export function createServer(db: Db): McpServer {
         "cites the hospital's source file. Published negotiated rates are not what any given patient pays.",
     },
   );
+  registerFindCodes(server, db);
   registerCompareCodePrices(server, db);
+  registerGetPayerRates(server, db);
+  registerLookupProvider(server, db);
+  registerDataQuality(server, db);
   registerReleaseInfo(server, db);
   return server;
 }

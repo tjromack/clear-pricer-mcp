@@ -3,19 +3,7 @@ import { z } from "zod";
 import { int, numOrNull, str, type Db, type Row } from "../db.js";
 import { NoMatchError } from "../errors.js";
 import { hospitalSources, provenance, provenanceSchema, type HospitalSource } from "../provenance.js";
-
-export const RATE_BASES = [
-  "dollar",
-  "dollar_from_percent",
-  "dollar_percent_unreconciled",
-  "algorithm_only",
-  "percent_only",
-  "no_payer",
-] as const;
-export const SETTINGS = ["inpatient", "outpatient", "both"] as const;
-
-/** Rate bases whose rows carry a dollar figure; the others have NULL rate columns by construction. */
-const HAS_DOLLARS: ReadonlySet<string> = new Set(["dollar", "dollar_from_percent", "dollar_percent_unreconciled"]);
+import { HAS_DOLLARS, RATE_BASES, RATE_BASIS_HELP, SETTINGS, normaliseCode } from "../vocab.js";
 
 export const inputSchema = {
   code: z
@@ -26,12 +14,7 @@ export const inputSchema = {
   rate_basis: z
     .enum(RATE_BASES)
     .default("dollar")
-    .describe(
-      "How the negotiated rate was published. 'dollar' = contracted dollar amount (compare hospitals on this unless " +
-        "asked otherwise); 'dollar_from_percent' = a percentage of the hospital's own charge, converted to dollars; " +
-        "'dollar_percent_unreconciled' = a dollar and a percentage that disagree; 'algorithm_only', 'percent_only' " +
-        "and 'no_payer' carry no dollar rate (gross and cash prices only).",
-    ),
+    .describe(`${RATE_BASIS_HELP} Compare hospitals on 'dollar' unless asked otherwise.`),
   setting: z
     .enum(SETTINGS)
     .optional()
@@ -105,7 +88,7 @@ const fmt = (p: z.infer<typeof publishedSchema>): string =>
   `${p.setting} / ${p.rate_basis}: ${p.charge_rows} charge rows${p.has_dollar_rates ? "" : " (no dollar rate)"}`;
 
 export async function compareCodePrices(db: Db, input: Input): Promise<Output> {
-  const code = input.code.trim().toUpperCase();
+  const code = normaliseCode(input.code);
   const tag = db.release.pin.tag;
   const hospitals = await hospitalSources(db);
 

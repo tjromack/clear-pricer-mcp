@@ -17,7 +17,57 @@
       ],
       "rows": 3,
       "distinct_keys": 3
+    },
+    "dim_charge_codes": {
+      "key": [
+        "item_id",
+        "code_seq"
+      ],
+      "rows": 1745,
+      "distinct_keys": 1745
+    },
+    "fct_standard_charges": {
+      "key": [
+        "charge_id"
+      ],
+      "rows": 4781,
+      "distinct_keys": 4781
+    },
+    "rpt_npi_reconciliation": {
+      "key": [
+        "hospital_id"
+      ],
+      "rows": 4,
+      "distinct_keys": 4
+    },
+    "rpt_npi_resolution": {
+      "key": [
+        "hospital_id",
+        "npi"
+      ],
+      "rows": 8,
+      "distinct_keys": 8
+    },
+    "rpt_source_conformance": {
+      "key": [
+        "hospital_id",
+        "kind",
+        "column"
+      ],
+      "rows": 9,
+      "distinct_keys": 9
+    },
+    "dim_provider_history": {
+      "key": [
+        "npi",
+        "version"
+      ],
+      "rows": 19,
+      "distinct_keys": 19
     }
   },
-  "derived": {}
+  "derived": {
+    "charges": 4781,
+    "charge_x_code_rows": 17264
+  }
 }

@@ -1,5 +1,5 @@
 import { DuckDBInstance, type DuckDBConnection, type DuckDBValue } from "@duckdb/node-api";
-import { REMOTE_FILES, type Release } from "./release.js";
+import { REMOTE_FILES, ReleaseIntegrityError, type Release } from "./release.js";
 
 /** Release tables the tools may query. Each becomes a view over a verified local file (or a size-checked URL). */
 export type TableName =
@@ -9,7 +9,8 @@ export type TableName =
   | "fct_standard_charges"
   | "dim_provider_history"
   | "rpt_npi_reconciliation"
-  | "rpt_source_conformance";
+  | "rpt_source_conformance"
+  | "rpt_npi_resolution";
 
 export type Row = Record<string, DuckDBValue>;
 
@@ -48,17 +49,35 @@ export class Db {
   private ensureView(table: TableName): Promise<void> {
     let p = this.views.get(table);
     if (!p) {
-      const file = `${table}.parquet`;
-      p = (REMOTE_FILES.has(file) ? this.release.remoteFile(file) : this.release.localFile(file)).then((location) =>
-        this.serial(async () => {
-          // The location is a cache path or the pinned release URL, never user input.
-          await this.conn.run(`CREATE OR REPLACE VIEW ${table} AS SELECT * FROM read_parquet(${sqlString(location)})`);
-        }),
-      );
+      p = this.createView(table);
       p.catch(() => this.views.delete(table));
       this.views.set(table, p);
     }
     return p;
+  }
+
+  private async createView(table: TableName): Promise<void> {
+    const file = `${table}.parquet`;
+    let location: string;
+    if (REMOTE_FILES.has(file)) {
+      const remote = await this.release.remoteFile(file);
+      location = remote.location;
+      // A range read cannot be hashed; the strongest cheap check is the footer's row count against the manifest.
+      const [meta] = await this.serial(async () =>
+        (await this.conn.runAndReadAll(`SELECT sum(num_rows) AS n FROM parquet_file_metadata(${sqlString(location)})`)).getRowObjects(),
+      );
+      const rows = int(meta?.["n"]);
+      if (rows !== remote.rows) {
+        throw new ReleaseIntegrityError(
+          `Refusing to read ${file}: its Parquet footer reports ${rows} rows at ${location}, but release ` +
+            `${this.release.pin.tag}'s manifest says ${remote.rows}. The published file has changed since the release was cut.`,
+        );
+      }
+    } else {
+      location = await this.release.localFile(file);
+    }
+    // The location is a cache path or the pinned release URL, never user input.
+    await this.serial(() => this.conn.run(`CREATE OR REPLACE VIEW ${table} AS SELECT * FROM read_parquet(${sqlString(location)})`));
   }
 
   private serial<T>(fn: () => Promise<T>): Promise<T> {

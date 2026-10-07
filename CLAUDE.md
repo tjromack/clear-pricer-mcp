@@ -39,9 +39,13 @@ a document store; this is a typed, grain-safe query surface over a versioned rel
 
 ## Environment gotcha (banked)
 
-This machine runs a **TLS-inspecting proxy**. DuckDB's own HTTPS reads work through it (verified 2026-10-07 from
-Python); confirm the same for `@duckdb/node-api` and Node's `fetch` in Milestone 0. If Node `fetch` fails cert
-verification, use `NODE_OPTIONS=--use-system-ca` (Node 22.15+), never `NODE_TLS_REJECT_UNAUTHORIZED=0`.
+This machine runs a **TLS-inspecting proxy** and sets `NODE_EXTRA_CA_CERTS` for it. DuckDB's HTTPS works through it
+on its own. Node's `fetch` works only with that variable, and **MCP clients (and the SDK's `StdioClientTransport`) do
+not pass it to the server** unless configured (CPM-DEC 013). Anything spawning the server must pass it explicitly
+(see `scripts/smoke.ts`). Never `NODE_TLS_REJECT_UNAUTHORIZED=0`.
+
+Vitest occasionally fails with "failed to find the runner" when the shell's drive letter changes case (`c:` vs `C:`);
+rerun from `C:\dev\mcp-clear-pricer`.
 
 ## Stack
 

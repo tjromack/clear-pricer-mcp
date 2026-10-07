@@ -23,6 +23,16 @@ claude mcp add clear-pricer -- npx -y clear-pricer-mcp
 
 [TKTK — Claude Desktop / Cursor config snippet · one screenshot or GIF of a cited answer]
 
+### Behind a corporate proxy
+
+MCP clients start the server with a minimal environment. If your network inspects TLS, pass your CA to Node in the
+server's config, e.g. for Claude Desktop:
+
+```json
+{ "mcpServers": { "clear-pricer": { "command": "npx", "args": ["-y", "clear-pricer-mcp"],
+  "env": { "NODE_EXTRA_CA_CERTS": "C:\\path\\to\\corporate-ca.pem" } } } }
+```
+
 ## Who it's for
 
 [TKTK]
@@ -40,8 +50,8 @@ tests; SHA-mismatch refusal; in-process client end-to-end run; recorded session.
 
 - Not a complete or authoritative price index: three Chicago hospitals, one pinned release. See clear-pricer's limits.
 - Not a price estimate for any patient. Published negotiated rates are not what a given person pays.
-- The NPPES provider history is read remotely by HTTP range, so it is size-checked against the manifest but not
-  hash-verified like every other file (CPM-DEC 002).
+- The NPPES provider history is read remotely by HTTP range, so its row count is checked against the manifest but
+  it is not hash-verified like every other file (CPM-DEC 002, 013).
 - [TKTK]
 
 ## Develop

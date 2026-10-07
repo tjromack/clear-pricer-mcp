@@ -18,21 +18,21 @@ tests. Decisions already settled (do not re-open): `DECISIONS.md` CPM-DEC 001–
 - [x] Hello-world MCP server over stdio; an SDK `Client` spawning it (source and compiled `dist/`) lists its one tool
 - [x] **Gate:** a real row from the release reaches an MCP client. **stop**
 
-## Milestone 1 — release layer + first tool, end to end (built 2026-10-07; awaiting CPM-DEC 006 confirmation)
+## Milestone 1 — release layer + first tool, end to end ✅ (2026-10-07)
 - [x] `release.ts`: pinned tag, manifest, cache dir, verify-or-refuse; `release_info` tool
 - [x] `provenance.ts` + `errors.ts` (actionable messages, `isError: true`)
 - [x] `compare_code_prices` with zod input/output schemas and `structuredContent`
 - [x] Fixture Parquet slices + fixture manifest (`scripts/make-fixtures`); offline contract tests
 - [x] e2e: SDK `Client` over `InMemoryTransport` lists tools and calls both
-- [ ] Confirm CPM-DEC 006 tool set. **Gate:** 99213 comparison matches the release; empty match errors loudly. **stop**
+- [x] Confirm CPM-DEC 006 tool set. **Gate:** 99213 comparison matches the release; empty match errors loudly. **stop**
 
-## Milestone 2 — the remaining tools
-- [ ] `find_codes` (search published descriptions; never AMA text)
-- [ ] `get_payer_rates` (filter codes before the join; `distinct charge_id`; bounded `limit`)
-- [ ] `lookup_provider` (NPI Luhn check digit with the 80840 prefix; half-open as-of)
-- [ ] `data_quality` (exclude or select the `ALL` row explicitly)
-- [ ] Contract tests per tool: schema, provenance on every row, fail-loudly, its grain guard
-- [ ] **Gate:** every tool has a passing contract test and a test that proves its grain guard. **stop**
+## Milestone 2 — the remaining tools ✅ (2026-10-07)
+- [x] `find_codes` (search published descriptions; never AMA text)
+- [x] `get_payer_rates` (filter codes before the join; `distinct charge_id`; bounded `limit`)
+- [x] `lookup_provider` (NPI Luhn check digit with the 80840 prefix; half-open as-of)
+- [x] `data_quality` (exclude or select the `ALL` row explicitly)
+- [x] Contract tests per tool: schema, provenance on every row, fail-loudly, its grain guard
+- [x] **Gate:** every tool has a passing contract test and a test that proves its grain guard. **stop**
 
 ## Milestone 3 — verification against the real release
 - [ ] `tests/release/`: tool outputs recomputed against `check_values.json` (row counts, fan-out 3.07×, integer-cent

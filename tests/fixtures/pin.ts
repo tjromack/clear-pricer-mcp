@@ -3,6 +3,6 @@ import type { ReleasePin } from "../../src/release.js";
 
 export const FIXTURE_PIN: ReleasePin = {
   "tag": "fixture-data-2026-10-07-67efd3d2",
-  "manifestSha256": "6e5b535f833f1a4f64604a313e904170596d1118528f08980192ad8b8126e09a"
+  "manifestSha256": "ff5119669723d89e4a23920b9ae3a46d68f9a4e6b3a0d80af57b0659531b771d"
 };
 export const FIXTURE_CODES = ["470","10011","12002","70553","73721","99213","99214","J1885"] as const;

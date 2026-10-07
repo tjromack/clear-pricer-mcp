@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import envPaths from "env-paths";
 import { z } from "zod";
@@ -18,7 +18,7 @@ export const DEFAULT_PIN: ReleasePin = {
   manifestSha256: "b46cbb9f98c0959b2a34d4852546a20e5baad6763f3acfa52e79174bed25ac04",
 };
 
-/** Files read by HTTP range instead of downloaded (CPM-DEC 002). Size-checked against the manifest, not hashed. */
+/** Files read by HTTP range instead of downloaded (CPM-DEC 002). Row-count-checked against the manifest, not hashed. */
 export const REMOTE_FILES: ReadonlySet<string> = new Set(["dim_provider_history.parquet"]);
 
 const SHA256_HEX = /^[0-9a-f]{64}$/;
@@ -63,10 +63,30 @@ export interface ReleaseSource {
   /** Human-readable origin, shown in provenance and errors. */
   readonly origin: string;
   fetch(name: string): Promise<Uint8Array>;
-  /** A URL DuckDB can range-read (remote files only). */
+  /** A URL (or path) DuckDB can range-read, for remote files. */
   url(name: string): string;
-  /** Size of a remote file without downloading it. */
-  size(name: string): Promise<number>;
+}
+
+/** Retry transient network failures (connection resets, DNS blips) with backoff; HTTP errors are not retried. */
+async function fetchWithRetry(url: string, init: RequestInit = {}, attempts = 3): Promise<Response> {
+  for (let i = 1; ; i++) {
+    try {
+      return await fetch(url, init);
+    } catch (err) {
+      if (i >= attempts) {
+        const cause = err instanceof Error && err.cause instanceof Error ? err.cause.message : String(err);
+        const tls = /certificate/i.test(cause)
+          ? " The certificate error usually means a TLS-inspecting proxy: give Node its CA by setting " +
+            "NODE_EXTRA_CA_CERTS (or NODE_OPTIONS=--use-system-ca) in this server's env in your MCP client config."
+          : " The server needs network access the first time each table is used; try again.";
+        throw new ReleaseIntegrityError(
+          `Could not reach ${new URL(url).host} to read ${url.split("/").pop() ?? url} after ${attempts} attempts ` +
+            `(${cause}).${tls}`,
+        );
+      }
+      await new Promise((r) => setTimeout(r, 250 * 2 ** i));
+    }
+  }
 }
 
 export function githubSource(tag: string): ReleaseSource {
@@ -74,19 +94,11 @@ export function githubSource(tag: string): ReleaseSource {
   return {
     origin: base,
     async fetch(name) {
-      const res = await fetch(`${base}/${name}`);
+      const res = await fetchWithRetry(`${base}/${name}`);
       if (!res.ok) throw new ReleaseIntegrityError(`Could not download ${name} from ${base}: HTTP ${res.status}.`);
       return new Uint8Array(await res.arrayBuffer());
     },
     url: (name) => `${base}/${name}`,
-    async size(name) {
-      const res = await fetch(`${base}/${name}`, { method: "HEAD" });
-      const len = res.headers.get("content-length");
-      if (!res.ok || len === null) {
-        throw new ReleaseIntegrityError(`Could not read the size of ${name} from ${base}: HTTP ${res.status}.`);
-      }
-      return Number(len);
-    },
   };
 }
 
@@ -100,8 +112,7 @@ export function directorySource(dir: string): ReleaseSource {
         throw new ReleaseIntegrityError(`${name} is not in ${dir}.`);
       }
     },
-    url: (name) => join(dir, name),
-    size: async (name) => (await stat(join(dir, name))).size,
+    url: (name) => join(dir, name).replaceAll("\\", "/"),
   };
 }
 
@@ -193,24 +204,14 @@ export class Release {
     return p;
   }
 
-  /** URL of a range-read file, after checking its size against the manifest (the most a range read can verify). */
-  remoteFile(name: string): Promise<string> {
-    let p = this.files.get(name);
-    if (!p) {
-      p = this.manifestEntry(name).then(async (entry) => {
-        const size = await this.source.size(name);
-        if (size !== entry.bytes) {
-          throw new ReleaseIntegrityError(
-            `Refusing to read ${name}: it is ${size} bytes at ${this.source.origin}, but release ${this.pin.tag}'s ` +
-              `manifest says ${entry.bytes}. The published file has changed since the release was cut.`,
-          );
-        }
-        return this.source.url(name);
-      });
-      p.catch(() => this.files.delete(name));
-      this.files.set(name, p);
-    }
-    return p;
+  /**
+   * Location of a range-read file and the row count the manifest promises for it. No network here: the caller
+   * (Db) checks the count against the file's Parquet footer through DuckDB, the same client that reads the file.
+   */
+  async remoteFile(name: string): Promise<{ location: string; rows: number }> {
+    if (!REMOTE_FILES.has(name)) throw new Error(`${name} is downloaded and hash-checked; use localFile().`);
+    const entry = await this.manifestEntry(name);
+    return { location: this.source.url(name), rows: entry.rows };
   }
 
   /** Per-file status without downloading anything new. A cached file is hashed once per process, then remembered. */
