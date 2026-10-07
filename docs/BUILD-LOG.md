@@ -36,3 +36,36 @@ resulting lockfile, so CI on Node 20/22 is unaffected.
 
 **Next.** Milestone 1: `release.ts` (pinned manifest hash → files → cache), provenance and error builders,
 `compare_code_prices` and `release_info` with contract tests on fixtures and an in-process e2e.
+
+## 2026-10-07 — Milestone 1: release layer, `compare_code_prices`, `release_info`
+
+**What happened.** Built the verification chain (`src/release.ts`): pinned manifest hash → manifest → every file,
+cached under the OS cache dir, written atomically, re-fetched if the cache is corrupted, refused if the source does
+not match. DuckDB views are created lazily over verified files (`src/db.ts`), so the server starts instantly and only
+downloads what a question touches. Provenance comes from the release's own `files` table. Two tools:
+`compare_code_prices` and `release_info`.
+
+**Results.**
+- Offline suite: 27 tests (unit, contract, in-process MCP client), fixture-backed, 0.8 s.
+- Release suite against `data-2026-10-07-67efd3d2`: 3 tests. `agg_code_prices` rows and proved key match
+  `check_values.json` (49,404 / 49,404); 99213 matches the release row for row.
+- Compiled `dist/` spawned over stdio by an SDK client (`npm run smoke`) answers both tools.
+- Sanity mutation: rewriting the query to average across settings failed the grain test immediately.
+
+**Decisions.** CPM-DEC 009 (`not_included` + notes instead of a silent partial answer; `setting` optional),
+CPM-DEC 010 (fixtures are verified slices of the real release with their own pinned manifest).
+
+**Learnings.**
+- Northwestern publishes contracted dollars for only 1,699 of its 18,478 code-price rows; the rest are percentages or
+  algorithms. None of the eight fixture codes has an NM dollar row. The "missing hospital" path is the common case,
+  not an edge case, which is why it is structured output and not an error.
+- No code string appears in two code families in this release; the guard stays because the table's key allows it.
+- The SDK validates `structuredContent` against `outputSchema` on both sides (server always; client once it has
+  listed tools), and skips validation on `isError` results, so throwing a descriptive error is the right
+  fail-loudly mechanism.
+
+**What broke.** A probe script "hung" for three minutes: it had never been written (the heredoc failed earlier in the
+same command), so the run was a no-op waiting on a pipe. Lesson: check the file exists before diagnosing the tool.
+
+**Next.** Confirm the tool set (CPM-DEC 006), then Milestone 2: `find_codes`, `get_payer_rates`, `lookup_provider`,
+`data_quality`.

@@ -86,3 +86,30 @@
 - **What:** add or upgrade dependencies with `npx npm@11 install …`; `npm ci` with npm 10 (what Node 20/22 runners
   ship) installs from that lockfile cleanly (verified). `vite` is a direct devDependency so vitest's peer is explicit.
 - **Rejected:** `--legacy-peer-deps` (silently changes resolution for every future install); vitest 5 (drops Node 20).
+
+## CPM-DEC 009 — `compare_code_prices` reports who is missing and why (2026-10-07)
+**Status:** Decided.
+
+- **What:** defaults to `rate_basis = 'dollar'` (contracted dollars, the like-for-like comparison per clear-pricer
+  CP-DEC 006). `setting` is optional; without it the tool returns one row per hospital × setting, never combined. Any
+  hospital without a row under the filter is listed in `not_included` with exactly what it does publish for the code
+  (setting × rate basis × charge rows, and whether those rows carry a dollar rate), and the same is stated in `notes`.
+- **Why:** Northwestern publishes contracted dollars for only 9% of its code-price rows (1,699 of 18,478); the rest
+  are percentages of its own charges or algorithms. For 99213 a dollar-only answer silently shows two hospitals out of
+  three. Naming the missing hospital and its alternative turns a silent omission into a choice the assistant can offer.
+- **Rejected:** returning every rate basis at once (invites averaging across bases, which `grain.md` forbids);
+  requiring `setting` (an assistant does not know which settings a code is published under, so it would guess).
+- **Grain guard:** rows are the table's own rows, filtered, never aggregated. A mutation that averaged across
+  settings was caught by the contract suite on the first try (formal mutation suite is Milestone 3).
+
+## CPM-DEC 010 — Fixtures are slices of the real release with their own pinned manifest (2026-10-07)
+**Status:** Decided.
+
+- **What:** `npm run fixtures` downloads and verifies the real pinned release, writes small Parquet slices (eight
+  codes, each chosen for the case it exercises, plus `files`) to `tests/fixtures/release/`, with a fixture
+  `manifest.json` and `check_values.json`, and pins the fixture manifest's SHA-256 in `tests/fixtures/pin.ts`.
+- **Why:** offline tests then run through the same verification chain as production (pin → manifest → file), so
+  the integrity tests test the real code path, not a mock. `.gitattributes` forces LF so the committed JSON hashes the
+  same on Windows and Linux.
+- **Rejected:** hand-written fixture rows (drift from the real schema unnoticed); mocking `Release` (would not test the
+  hashing at all).

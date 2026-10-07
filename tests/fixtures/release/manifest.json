@@ -1,0 +1,43 @@
+{
+  "fingerprint": "fixture-of-67efd3d2f5b0b88f8ac3db50d71c4e1153b4a64519a956fd102a30d7951ed770",
+  "inputs": {
+    "price_files": [
+      {
+        "hospital_id": "nm",
+        "source_sha256": "908ac958d68c74c252c25686c81efef67f558106efbc35877ee779550a993712",
+        "last_updated_on": "2026-04-01"
+      },
+      {
+        "hospital_id": "rush",
+        "source_sha256": "47f313959c969ca2b7a3c71eeb3fab76165a4c13b0346991337b60b6074f3b80",
+        "last_updated_on": "2026-09-25"
+      },
+      {
+        "hospital_id": "uchicago",
+        "source_sha256": "a0f699c35bc550d83d9ff0a0a3b7d9e4184549209faacf6b71ad397cca2d6ac7",
+        "last_updated_on": "2026-04-01"
+      }
+    ],
+    "nppes_files": [
+      "NPPES_Data_Dissemination_091426_092026_Weekly_V2.zip",
+      "NPPES_Data_Dissemination_092126_092726_Weekly_V2.zip",
+      "NPPES_Data_Dissemination_092826_100426_Weekly_V2.zip",
+      "NPPES_Data_Dissemination_September_2026_V2.zip"
+    ]
+  },
+  "files": [
+    {
+      "file": "agg_code_prices.parquet",
+      "rows": 50,
+      "bytes": 5664,
+      "sha256": "43c4e234525e27934c380e5982a1cdcbe180665d8d891c17cb2fba2823ccefd0"
+    },
+    {
+      "file": "files.parquet",
+      "rows": 3,
+      "bytes": 5213,
+      "sha256": "30893f775f28e644bd92e4e1894f78db7834e4ec9719b2b66f2801dcaf369d7d"
+    }
+  ],
+  "check_values_sha256": "db0e8a1e7d4e80f2120879ce8732ba062067e6c5aae7abd90106f0080cc1ce00"
+}

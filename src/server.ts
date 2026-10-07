@@ -1,46 +1,22 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { DuckDBInstance } from "@duckdb/node-api";
-import { z } from "zod";
+import type { Db } from "./db.js";
+import { registerCompareCodePrices } from "./tools/compare_code_prices.js";
+import { registerReleaseInfo } from "./tools/release_info.js";
 
-// Milestone 0 walking skeleton: one throwaway tool proving a real release row reaches an MCP client.
-// Milestone 1 replaces it with release.ts + the real tools.
-const BASE = "https://github.com/tjromack/clear-pricer/releases/download/data-2026-10-07-67efd3d2";
+export const SERVER_VERSION = "0.1.0";
 
-export function createServer(): McpServer {
-  const server = new McpServer({ name: "clear-pricer-mcp", version: "0.0.0" });
-
-  server.registerTool(
-    "spike_code_prices",
+/** Registers the tools only; no SQL and no I/O here, so tests can hand it a Db over fixtures. */
+export function createServer(db: Db): McpServer {
+  const server = new McpServer(
+    { name: "clear-pricer-mcp", version: SERVER_VERSION },
     {
-      title: "Spike: one code across hospitals",
-      description: "Milestone 0 only. Contracted-dollar prices for one billing code from the pinned release.",
-      inputSchema: { code: z.string().regex(/^[0-9A-Z]{4,7}$/) },
-      outputSchema: {
-        rows: z.array(
-          z.object({ hospital_id: z.string(), setting: z.string(), charge_rows: z.number().int(), rate_median: z.number() }),
-        ),
-      },
-      annotations: { readOnlyHint: true, openWorldHint: false },
-    },
-    async ({ code }) => {
-      const db = await DuckDBInstance.create(":memory:");
-      const conn = await db.connect();
-      const reader = await conn.runAndReadAll(
-        `SELECT hospital_id, setting, charge_rows, rate_median
-           FROM '${BASE}/agg_code_prices.parquet'
-          WHERE code = $code AND rate_basis = 'dollar' ORDER BY hospital_id, setting`,
-        { code },
-      );
-      const rows = reader.getRowObjects().map((r) => ({
-        hospital_id: String(r["hospital_id"]),
-        setting: String(r["setting"]),
-        charge_rows: Number(r["charge_rows"]),
-        rate_median: Number(r["rate_median"]),
-      }));
-      conn.closeSync();
-      return { content: [{ type: "text", text: JSON.stringify(rows) }], structuredContent: { rows } };
+      instructions:
+        "Read-only access to clear-pricer's public data release: hospital price-transparency files from three Chicago " +
+        "hospitals (Northwestern Memorial, Rush, UChicago Medical Center) and the NPPES provider registry. Every row " +
+        "cites the hospital's source file. Published negotiated rates are not what any given patient pays.",
     },
   );
-
+  registerCompareCodePrices(server, db);
+  registerReleaseInfo(server, db);
   return server;
 }

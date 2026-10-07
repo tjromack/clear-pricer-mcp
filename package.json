@@ -1,6 +1,6 @@
 {
   "name": "clear-pricer-mcp",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Read-only MCP server over clear-pricer's public hospital price and provider data release, with provenance on every row.",
   "license": "MIT",
   "author": "Trevor J. Romack <tjromack@gmail.com>",
@@ -25,8 +25,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project offline",
     "test:release": "vitest run --project release",
-    "spike": "node --import tsx scripts/spike.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "fixtures": "node --import tsx scripts/make-fixtures.ts",
+    "smoke": "node --import tsx scripts/smoke.ts"
   },
   "keywords": [
     "mcp",

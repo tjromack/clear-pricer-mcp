@@ -1,0 +1,23 @@
+{
+  "tables": {
+    "agg_code_prices": {
+      "key": [
+        "hospital_id",
+        "code_family",
+        "code",
+        "setting",
+        "rate_basis"
+      ],
+      "rows": 50,
+      "distinct_keys": 50
+    },
+    "files": {
+      "key": [
+        "hospital_id"
+      ],
+      "rows": 3,
+      "distinct_keys": 3
+    }
+  },
+  "derived": {}
+}

@@ -18,12 +18,12 @@ tests. Decisions already settled (do not re-open): `DECISIONS.md` CPM-DEC 001–
 - [x] Hello-world MCP server over stdio; an SDK `Client` spawning it (source and compiled `dist/`) lists its one tool
 - [x] **Gate:** a real row from the release reaches an MCP client. **stop**
 
-## Milestone 1 — release layer + first tool, end to end
-- [ ] `release.ts`: pinned tag, manifest, cache dir, verify-or-refuse; `release_info` tool
-- [ ] `provenance.ts` + `errors.ts` (actionable messages, `isError: true`)
-- [ ] `compare_code_prices` with zod input/output schemas and `structuredContent`
-- [ ] Fixture Parquet slices + fixture manifest (`scripts/make-fixtures`); offline contract tests
-- [ ] e2e: SDK `Client` over `InMemoryTransport` lists tools and calls both
+## Milestone 1 — release layer + first tool, end to end (built 2026-10-07; awaiting CPM-DEC 006 confirmation)
+- [x] `release.ts`: pinned tag, manifest, cache dir, verify-or-refuse; `release_info` tool
+- [x] `provenance.ts` + `errors.ts` (actionable messages, `isError: true`)
+- [x] `compare_code_prices` with zod input/output schemas and `structuredContent`
+- [x] Fixture Parquet slices + fixture manifest (`scripts/make-fixtures`); offline contract tests
+- [x] e2e: SDK `Client` over `InMemoryTransport` lists tools and calls both
 - [ ] Confirm CPM-DEC 006 tool set. **Gate:** 99213 comparison matches the release; empty match errors loudly. **stop**
 
 ## Milestone 2 — the remaining tools
