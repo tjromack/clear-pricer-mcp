@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { int, numOrNull, str } from "../../src/db.js";
-import { FIXTURE_PIN } from "../fixtures/pin.js";
+import { FIXTURE_CODES, FIXTURE_PIN } from "../fixtures/pin.js";
 import { connect, text, type Connected } from "../helpers.js";
 
 interface Price {
@@ -8,6 +8,7 @@ interface Price {
   setting: string;
   rate_basis: string;
   charge_rows: number;
+  payer_plans: number;
   rate_median: number | null;
   rate_min: number | null;
   rate_max: number | null;
@@ -80,6 +81,31 @@ describe("compare_code_prices — contract", () => {
     expect(out.prices.map((p) => [p.charge_rows, p.rate_min, p.rate_median, p.rate_max])).toEqual(
       raw.map((r) => [int(r["charge_rows"]), numOrNull(r["rate_min"]), numOrNull(r["rate_median"]), numOrNull(r["rate_max"])]),
     );
+  });
+
+  it("for every fixture code and every basis, returns exactly the table's rows: same count, same keys, same values", async () => {
+    for (const code of FIXTURE_CODES) {
+      for (const rate_basis of ["dollar", "dollar_from_percent"]) {
+        const raw = await t.db.query(
+          ["agg_code_prices"],
+          `SELECT hospital_id, setting, charge_rows, payer_plans, rate_median FROM agg_code_prices
+            WHERE code = $code AND rate_basis = $basis ORDER BY hospital_id, setting`,
+          { code, basis: rate_basis },
+        );
+        const res = await t.call("compare_code_prices", { code, rate_basis });
+        if (raw.length === 0) {
+          expect(res.isError, `${code}/${rate_basis}`).toBe(true);
+          continue;
+        }
+        const out = res.structuredContent as unknown as Out;
+        expect(
+          out.prices.map((p) => [p.hospital_id, p.setting, p.charge_rows, p.payer_plans, p.rate_median]),
+          `${code}/${rate_basis}`,
+        ).toEqual(
+          raw.map((r) => [str(r["hospital_id"]), str(r["setting"]), int(r["charge_rows"]), int(r["payer_plans"]), numOrNull(r["rate_median"])]),
+        );
+      }
+    }
   });
 
   it("filters to one setting when asked", async () => {

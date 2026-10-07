@@ -161,7 +161,7 @@ searches `agg_code_prices.example_description`, since `dim_charge_codes` has no 
   wrong provenance, closed intervals, skipped integrity checks). `npm run mutate` applies each, requires it to
   type-check, runs every suite (offline and release), records which tests failed, restores the file, and generates
   `docs/results/contract-tests.md`. A mutant that does not compile is reported `invalid` and proves nothing.
-- **Result on 2026-10-07:** 24 of 24 killed, against 87 tests (17 unit, 45 contract, 3 e2e, 22 release).
+- **Result on 2026-10-07:** 24 of 24 killed, against 88 tests (17 unit, 46 contract, 3 e2e, 22 release).
 - **What the suite found:** one survivor on the first run (PAY-6: the per-setting breakdown silently filtered by
   payer), which had no test; a test was added and it is now killed. One planned mutant (latest version starting on or
   before the as-of date) turned out to be **equivalent**: the history has no gaps between versions

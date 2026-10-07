@@ -128,8 +128,9 @@ restored, with the results page generated from the run (`npm run mutate` → `do
 - REL-3 and NPI-3 initially failed to type-check (`findLast` is ES2023; the target is ES2022). The runner reports
   those as invalid rather than killed, which is what kept them from inflating the score.
 
-**Learnings.** CMP-1 (averaging across settings) is caught by exactly one test. Killed, but thin: the most
-important grain rule in the project rests on a single assertion. Worth a second, independent test in a later pass.
+**Learnings.** CMP-1 (averaging across settings) was caught by exactly one test: killed, but the most important
+grain rule rested on a single assertion. Added an independent test (every fixture code × two rate bases, row for row
+against the raw table); CMP-1 is now caught by two. 88 tests total.
 
 **Next.** Milestone 4: CI on ubuntu + windows, npm publish workflow, README with real numbers, recorded session,
 §01 scoring.

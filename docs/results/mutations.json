@@ -1,7 +1,7 @@
 {
   "baseline": {
-    "passed": 87,
-    "total": 87
+    "passed": 88,
+    "total": 88
   },
   "outcomes": [
     {
@@ -10,7 +10,8 @@
       "bug": "Averages a hospital's rows across settings into one row (crosses the agg_code_prices grain)",
       "status": "killed",
       "killedBy": [
-        "contract/compare_code_prices.test.ts › compare_code_prices — contract returns table rows as published: one per hospital × setting, never combined"
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract returns table rows as published: one per hospital × setting, never combined",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract for every fixture code and every basis, returns exactly the table's rows: same count, same keys, same values"
       ]
     },
     {
@@ -22,6 +23,7 @@
         "release/compare_code_prices.release.test.ts › against the pinned release 99213 matches the release row for row, with Northwestern reported as not publishing contracted dollars",
         "contract/compare_code_prices.test.ts › compare_code_prices — contract defaults to contracted dollars and names the hospital that publishes the code another way",
         "contract/compare_code_prices.test.ts › compare_code_prices — contract returns table rows as published: one per hospital × setting, never combined",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract for every fixture code and every basis, returns exactly the table's rows: same count, same keys, same values",
         "contract/compare_code_prices.test.ts › compare_code_prices — contract filters to one setting when asked",
         "contract/compare_code_prices.test.ts › compare_code_prices — contract includes a hospital once the caller asks for the basis it publishes",
         "contract/compare_code_prices.test.ts › compare_code_prices — contract says plainly when a rate basis carries no dollar figure",
@@ -46,6 +48,7 @@
       "bug": "Returns an empty price list as success when nothing matches",
       "status": "killed",
       "killedBy": [
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract for every fixture code and every basis, returns exactly the table's rows: same count, same keys, same values",
         "contract/compare_code_prices.test.ts › compare_code_prices — fails loudly, never empty a filter nothing matches is an error listing what each hospital does publish"
       ]
     },
@@ -58,6 +61,7 @@
         "release/compare_code_prices.release.test.ts › against the pinned release 99213 matches the release row for row, with Northwestern reported as not publishing contracted dollars",
         "contract/compare_code_prices.test.ts › compare_code_prices — contract defaults to contracted dollars and names the hospital that publishes the code another way",
         "contract/compare_code_prices.test.ts › compare_code_prices — contract returns table rows as published: one per hospital × setting, never combined",
+        "contract/compare_code_prices.test.ts › compare_code_prices — contract for every fixture code and every basis, returns exactly the table's rows: same count, same keys, same values",
         "contract/compare_code_prices.test.ts › compare_code_prices — contract includes a hospital once the caller asks for the basis it publishes",
         "contract/compare_code_prices.test.ts › compare_code_prices — contract lists a hospital that does not publish the code at all with nothing published",
         "e2e/server.test.ts › server over MCP answers a price question end to end with text a client without structured output can read"
@@ -197,7 +201,6 @@
       "bug": "Ignores the as-of date and returns the current registration",
       "status": "killed",
       "killedBy": [
-        "release/tools.release.test.ts › the other tools against the release lookup_provider answers the as-of example from clear-pricer's grain.md",
         "contract/lookup_provider.test.ts › lookup_provider — as-of semantics uses half-open intervals: valid_from is inclusive, valid_to exclusive",
         "contract/lookup_provider.test.ts › lookup_provider — as-of semantics reports a reactivated NPI's earlier deactivated version",
         "contract/lookup_provider.test.ts › lookup_provider — fails loudly a date before the first version lists the ranges that exist"
