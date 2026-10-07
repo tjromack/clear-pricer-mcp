@@ -28,7 +28,8 @@
     "start": "node dist/index.js",
     "fixtures": "node --import tsx scripts/make-fixtures.ts",
     "smoke": "node --import tsx scripts/smoke.ts",
-    "mutate": "node --import tsx scripts/mutate.ts"
+    "mutate": "node --import tsx scripts/mutate.ts",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "keywords": [
     "mcp",
@@ -50,5 +51,9 @@
     "typescript": "~5.9.3",
     "vite": "^7.3.7",
     "vitest": "^4.1.11"
+  },
+  "homepage": "https://github.com/tjromack/clear-pricer-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/tjromack/clear-pricer-mcp/issues"
   }
 }

@@ -1,0 +1,56 @@
+name: publish
+
+# Publishes to npm when a version tag is pushed (git tag v0.1.0 && git push --tags), after the same gates as CI.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write # npm provenance: the package links back to this workflow run
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      CLEAR_PRICER_CACHE_DIR: ${{ github.workspace }}/.release-cache
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - name: Tag matches package.json version
+        run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run test:release
+      - run: npm run build
+      - run: npm run smoke
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # The card's try-it command, exactly as a stranger runs it, from the registry on a clean runner.
+  npx-smoke:
+    needs: publish
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Wait for the registry to serve the new version
+        shell: bash
+        run: |
+          v=$(node -p "require('./package.json').version")
+          for i in $(seq 1 30); do npm view "clear-pricer-mcp@$v" version && exit 0; sleep 10; done; exit 1
+      - name: npx -y clear-pricer-mcp, driven by an MCP client over stdio
+        shell: bash
+        run: npm run smoke -- npx -y "clear-pricer-mcp@$(node -p "require('./package.json').version")"
