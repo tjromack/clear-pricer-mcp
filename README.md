@@ -34,7 +34,7 @@ Claude Desktop, Cursor and other clients take the same command in their MCP conf
 The first question about a table downloads it once from the pinned release (every table but the 117 MB charge table
 is under 3 MB) into your OS cache, verified against the release's manifest.
 
-[TKTK — recorded session GIF: Claude Code answering a price question with cited rows]
+![Claude Code answering hospital price questions through clear-pricer-mcp, with cited rows](docs/demo.gif)
 
 ### Behind a corporate proxy
 

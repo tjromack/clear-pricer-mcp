@@ -181,3 +181,19 @@ and weekly; first run green on both.
 checks, not the package, and both were only visible because the checks ran against the real registry.
 
 **Score.** §01 at 15/16; the recorded session GIF is the last point.
+
+## 2026-10-08 — Recorded session; §01 at 16/16
+
+**What happened.** Connected the published server to the Claude Code VS Code extension (`claude mcp add --scope user`
+with `NODE_EXTRA_CA_CERTS` passed through, via the extension's bundled `claude.exe`, since no `claude` command is on
+PATH), recorded the five-question session from `docs/DEMO.md`, and added it to the README as `docs/demo.gif`
+(7.1 MB). §01 is now 16/16.
+
+**What broke.** Two small ones, both outside the code. Windows PowerShell 5.1 drops a bare `--` before passing it to a
+native program, so `claude mcp add … -- npx …` has to quote it (`'--'`). And the GIF arrived as `demo.gif.gif`
+(Explorer hides known extensions); renamed.
+
+**Also fixed (in clear-pricer).** The as-of example in `docs/grain.md` and `docs/QUERY.md` used 2026-06-30, before
+that NPI's history begins (2026-07-16), so it returned 0 rows. Moved to 2026-10-01.
+
+**Next.** The case study, due within two weeks of the 2026-10-07 ship; then the site card.
