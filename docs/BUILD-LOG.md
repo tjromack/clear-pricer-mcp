@@ -197,3 +197,19 @@ native program, so `claude mcp add … -- npx …` has to quote it (`'--'`). And
 that NPI's history begins (2026-07-16), so it returned 0 rows. Moved to 2026-10-01.
 
 **Next.** The case study, due within two weeks of the 2026-10-07 ship; then the site card.
+
+## 2026-10-08 — Case study, and the site handoff
+
+**What happened.** Wrote the case study (`docs/CASE-STUDY.md`) and a version for the site's `projects` collection,
+with the /builds card as a `buildOverrides` entry. The site plays screen recordings as MP4 with a poster, not GIF, so
+the recording was converted (932×682, 5.7 MB) and its poster taken from the 99213 answer. The handoff was applied to
+a throwaway clone of the site, and the site's own gates passed: `seo-check` across 19 pages, and `figure-check`
+confirming every pill figure appears in the case study.
+
+**Learnings.** The recording caught a model using the fail-loudly design as an interface. Asked for Northwestern's
+rates by payer, it sent a filter it expected to match nothing, read the list of 15 payers out of the error, and
+fetched them one at a time by name so no rows were cut off. The error was written to explain a dead end; the model
+used it as an index.
+
+**Found in passing.** The site's `astro check` reports 3 pre-existing errors in `src/lib/lens-style.ts`: three style
+maps lack the `forward-deployed` lens. Noted in the handoff; not this project's to fix.

@@ -117,5 +117,5 @@ npm run mutate            # the 24-mutant suite; rewrites docs/results/
 npm run build && npm run smoke   # the compiled server over stdio, one question per tool
 ```
 
-Design decisions and what was rejected are in [DECISIONS.md](DECISIONS.md); the build journal is
-[docs/BUILD-LOG.md](docs/BUILD-LOG.md).
+The case study is [docs/CASE-STUDY.md](docs/CASE-STUDY.md). Design decisions and what was rejected are in
+[DECISIONS.md](DECISIONS.md); the build journal is [docs/BUILD-LOG.md](docs/BUILD-LOG.md).

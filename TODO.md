@@ -56,5 +56,6 @@ tests. Decisions already settled (do not re-open): `DECISIONS.md` CPM-DEC 001–
 - [x] **Gate:** §01 ≥ 14 (met at 16). **stop**
 
 ## After ship
-- [ ] Case study within two weeks (`docs/CASE-STUDY.md` + /work), "What broke" from the build log
-- [ ] Site card: demonstrates line, verification pills, try-it command
+- [x] Case study (`docs/CASE-STUDY.md`, 2026-10-08); the /work version is drafted for the site repo
+- [ ] Site: apply the handoff (case study .mdx, video, /builds card) in `tjromack-site`
+- [x] Site card drafted: demonstrates line, verification pills, try-it command (proven in a trial site build)
