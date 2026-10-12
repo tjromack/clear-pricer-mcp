@@ -1,6 +1,7 @@
 # clear-pricer-mcp
 
 [![ci](https://github.com/tjromack/clear-pricer-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/tjromack/clear-pricer-mcp/actions/workflows/ci.yml)
+[![M8ven Score](https://m8ven.ai/badge/mcp/tjromack-clear-pricer-mcp-7v9m47?v=8a242f1dd1bd8ec6970fc4d7a8896075)](https://m8ven.ai/mcp/tjromack-clear-pricer-mcp-7v9m47?s=readme)
 
 > © 2026 Trevor J. Romack — MIT-licensed ([LICENSE](LICENSE)) · tjromack@gmail.com
 
