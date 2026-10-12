@@ -57,5 +57,5 @@ tests. Decisions already settled (do not re-open): `DECISIONS.md` CPM-DEC 001–
 
 ## After ship
 - [x] Case study (`docs/CASE-STUDY.md`, 2026-10-08); the /work version is drafted for the site repo
-- [ ] Site: apply the handoff (case study .mdx, video, /builds card) in `tjromack-site`
+- [x] Site: handoff applied in `tjromack-site` (case study, video, /builds card; chips and blurb now from GitHub, `50280e1`)
 - [x] Site card drafted: demonstrates line, verification pills, try-it command (proven in a trial site build)
