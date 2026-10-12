@@ -1,6 +1,6 @@
 {
   "name": "clear-pricer-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Read-only MCP server over clear-pricer's public hospital price and provider data release, with provenance on every row.",
   "license": "MIT",
   "author": "Trevor J. Romack <tjromack@gmail.com>",

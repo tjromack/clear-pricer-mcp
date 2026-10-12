@@ -135,7 +135,7 @@ export function registerDataQuality(server: McpServer, db: Db): void {
         "it to qualify any price answer.",
       inputSchema,
       outputSchema,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async (input) => {
       const out = await dataQuality(db, input);

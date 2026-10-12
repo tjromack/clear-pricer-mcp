@@ -163,7 +163,7 @@ export function registerFindCodes(server: McpServer, db: Db): void {
         "descriptions. Use the code with compare_code_prices or get_payer_rates.",
       inputSchema,
       outputSchema,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async (input) => {
       const out = await findCodes(db, input);

@@ -213,3 +213,15 @@ used it as an index.
 
 **Found in passing.** The site's `astro check` reports 3 pre-existing errors in `src/lib/lens-style.ts`: three style
 maps lack the `forward-deployed` lens. Noted in the handoff; not this project's to fix.
+
+## 2026-10-12 — 0.1.1: all four tool hints declared
+
+**What happened.** M8ven, an independent MCP trust index, picked the repo up and graded it B (89/100, capped for new
+projects until adoption) with no concerning findings: six read-only tools whose handlers match their declared
+behaviour, no credential flows, open source with a license. Its one quality suggestion: every tool declared
+`readOnlyHint`, `idempotentHint` and `openWorldHint` but not `destructiveHint`. The MCP spec only reads that hint when
+a tool is not read-only, but some directories (OpenAI's) reject a tool unless all four are explicit booleans.
+
+**Change.** `destructiveHint: false` on all six tools; the e2e test now requires all four hints, with values matching
+the handlers. Checked by removing the hint from one tool: the test failed and named it. Released as 0.1.1, since npm
+users get annotations from the published package, not the repo.

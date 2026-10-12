@@ -7,7 +7,7 @@ import { registerGetPayerRates } from "./tools/get_payer_rates.js";
 import { registerLookupProvider } from "./tools/lookup_provider.js";
 import { registerReleaseInfo } from "./tools/release_info.js";
 
-export const SERVER_VERSION = "0.1.0";
+export const SERVER_VERSION = "0.1.1";
 
 /** Registers the tools only; no SQL and no I/O here, so tests can hand it a Db over fixtures. */
 export function createServer(db: Db): McpServer {

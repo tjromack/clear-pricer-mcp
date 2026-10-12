@@ -201,7 +201,7 @@ export function registerLookupProvider(server: McpServer, db: Db): void {
         "discloses it. Validates the NPI check digit first.",
       inputSchema,
       outputSchema,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async (input) => {
       const out = await lookupProvider(db, input);

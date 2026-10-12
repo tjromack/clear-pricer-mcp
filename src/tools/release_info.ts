@@ -54,7 +54,7 @@ export function registerReleaseInfo(server: McpServer, db: Db): void {
         "against, the hospital price files and NPPES files it was built from, and each table's row count and status.",
       inputSchema: {},
       outputSchema,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async () => {
       const out = await releaseInfo(db);

@@ -219,7 +219,7 @@ export function registerCompareCodePrices(server: McpServer, db: Db): void {
         "the code differently are listed in not_included with what they do publish.",
       inputSchema,
       outputSchema,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async (input) => {
       const out = await compareCodePrices(db, input);

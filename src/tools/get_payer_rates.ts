@@ -241,7 +241,7 @@ export function registerGetPayerRates(server: McpServer, db: Db): void {
         "in the hospital's source file. The first call downloads the 117 MB charge table once.",
       inputSchema,
       outputSchema,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async (input) => {
       const out = await getPayerRates(db, input);

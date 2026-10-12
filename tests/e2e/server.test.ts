@@ -20,7 +20,13 @@ describe("server over MCP", () => {
       "release_info",
     ]);
     for (const tool of tools) {
-      expect(tool.annotations?.readOnlyHint, tool.name).toBe(true);
+      // All four hints explicit, matching the handlers: some directories (OpenAI's) reject a tool missing any of them.
+      expect(tool.annotations, tool.name).toMatchObject({
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      });
       expect(tool.outputSchema, tool.name).toBeDefined();
       expect(tool.description?.length, tool.name).toBeGreaterThan(40);
     }
